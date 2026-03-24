@@ -1,13 +1,12 @@
-// Main App component sets up providers (QueryClient, Router, Theme)
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter } from 'react-router-dom';
+import { AppRoutes } from './router';
 
-const queryClient = new QueryClient()
-
-export default function App() {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* Router and layouts go here */}
-      <div>App shell</div>
-    </QueryClientProvider>
-  )
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
 }
+
+export default App;
