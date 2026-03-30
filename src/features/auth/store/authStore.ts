@@ -10,6 +10,7 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  isEmailVerified: boolean;
   isLoading: boolean;
   error: string | null;
 
@@ -19,119 +20,155 @@ interface AuthState {
   clearError: () => void;
 }
 
-const storedUser = localStorage.getItem('user');
-const storedAccess = localStorage.getItem('accessToken');
-const storedRefresh = localStorage.getItem('refreshToken');
+const cleanTokenValue = (value: string | null) => {
+  if (!value) return null;
+  const cleaned = value.trim();
+  if (cleaned === 'undefined' || cleaned === 'null' || cleaned === '') return null;
+  return cleaned;
+};
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  user: storedUser ? JSON.parse(storedUser) : null,
-  accessToken: storedAccess ?? null,
-  refreshToken: storedRefresh ?? null,
-  isAuthenticated: !!storedAccess,
-  isLoading: false,
-  error: null,
+const isTokenValid = (token: string | null) => {
+  if (!token) return false;
 
-  login: async (dto: LoginDto) => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await fetch(`${BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dto),
-      });
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return Date.now() < payload.exp * 1000;
+  } catch {
+    return false;
+  }
+};
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Login failed');
-      }
+const storedUser = cleanTokenValue(localStorage.getItem('user'));
+const rawAccess = cleanTokenValue(localStorage.getItem('accessToken'));
+const storedAccess = isTokenValid(rawAccess) ? rawAccess : null;
+const storedRefresh = cleanTokenValue(localStorage.getItem('refreshToken'));
 
-      const data: AuthResponse = await res.json();
+if (!isTokenValid(rawAccess)) {
+  localStorage.removeItem('user');
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+}
 
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
+export const useAuthStore = create<AuthState>((set, get) => {
+  const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+  return {
+    user: parsedUser,
+    accessToken: storedAccess,
+    refreshToken: storedRefresh,
+    isAuthenticated: Boolean(storedAccess) && parsedUser && parsedUser.isEmailVerified !== false,
+    isEmailVerified: parsedUser?.isEmailVerified ?? false,
+    isLoading: false,
+    error: null,
 
-      set({
-        user: data.user,
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-
-      return data.user;
-    } catch (error: any) {
-      set({ error: error.message, isLoading: false });
-      return null;
-    }
-  },
-
-  register: async (dto: RegisterDto) => {
-    set({ isLoading: true, error: null });
-    try {
-      const res = await fetch(`${BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dto),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message ?? 'Registration failed');
-      }
-
-      const data: AuthResponse = await res.json();
-
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-
-      set({
-        user: data.user,
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-
-      return data.user; // ✅ required by interface
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'Registration failed';
-
-      set({ error: message, isLoading: false });
-      return null;
-    }
-  },
-
-  logout: async () => {
-    const { user, accessToken } = get();
-
-    try {
-      if (user && accessToken) {
-        await fetch(`${BASE_URL}/auth/logout`, {
+    login: async (dto: LoginDto) => {
+      set({ isLoading: true, error: null });
+      try {
+        const res = await fetch(`${BASE_URL}/auth/login`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ userId: user.id }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dto),
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Login failed');
+        }
+
+        const data: AuthResponse = await res.json();
+
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+
+        const isEmailVerified = data.user.isEmailVerified === true;
+
+        set({
+          user: data.user,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          isAuthenticated: isEmailVerified !== false,
+          isEmailVerified,
+          isLoading: false,
+        });
+
+        return data.user;
+      } catch (error: any) {
+        set({ error: error.message, isLoading: false });
+        return null;
+      }
+    },
+
+    register: async (dto: RegisterDto) => {
+      set({ isLoading: true, error: null });
+      try {
+        const res = await fetch(`${BASE_URL}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dto),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message ?? 'Registration failed');
+        }
+
+        const data: AuthResponse = await res.json();
+
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+
+        const isEmailVerified = data.user.isEmailVerified === true;
+
+        set({
+          user: data.user,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          isAuthenticated: isEmailVerified,
+          isEmailVerified,
+          isLoading: false,
+        });
+
+        return data.user;
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : 'Registration failed';
+
+        set({ error: message, isLoading: false });
+        return null;
+      }
+    },
+
+    logout: async () => {
+      const { user, accessToken } = get();
+
+      try {
+        if (user && accessToken) {
+          await fetch(`${BASE_URL}/auth/logout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ userId: user.id }),
+          });
+        }
+      } finally {
+        localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+
+        set({
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+          isAuthenticated: false,
+          isEmailVerified: false,
+          error: null,
         });
       }
-    } finally {
-      localStorage.removeItem('user');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+    },
 
-      set({
-        user: null,
-        accessToken: null,
-        refreshToken: null,
-        isAuthenticated: false,
-        error: null,
-      });
-    }
-  },
-
-  clearError: () => set({ error: null }),
-}));
+    clearError: () => set({ error: null }),
+  };
+});

@@ -17,5 +17,8 @@ export interface UserDto {
   firstName: string;
   lastName: string;
   isActive: boolean;
+  isEmailVerified: boolean;
+  emailVerificationToken?: string | null;
+  emailVerificationTokenExpires?: string | null;
   roles: RoleDto[];
 }
