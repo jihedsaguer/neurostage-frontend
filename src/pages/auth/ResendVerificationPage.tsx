@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
-import { useEmailVerification } from '@/features/auth/hooks/useEmailVerification';
+import { useResendVerificationEmailMutation } from '@/redux/features/auth/authApi';
 
 const resendSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -19,8 +19,9 @@ type ResendFormValues = z.infer<typeof resendSchema>;
 export function ResendVerificationPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { resend, loading, error, clearMessages } = useEmailVerification();
+  const [resendVerificationEmail, { isLoading }] = useResendVerificationEmailMutation();
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const prefilledEmail = searchParams.get('email') || '';
 
@@ -39,10 +40,20 @@ export function ResendVerificationPage() {
   const email = watch('email');
 
   const onSubmit = async (data: ResendFormValues) => {
-    clearMessages();
-    await resend(data.email);
-    if (!error) {
+    setError(null);
+
+    try {
+      await resendVerificationEmail(data.email).unwrap();
       setSubmitted(true);
+    } catch (err) {
+      if (typeof err === 'string') {
+        setError(err);
+      } else if (typeof err === 'object' && err !== null && 'data' in err) {
+        const message = (err as { data?: { message?: string } }).data?.message;
+        setError(message ?? 'Failed to resend verification email');
+      } else {
+        setError('Failed to resend verification email');
+      }
     }
   };
 
@@ -90,7 +101,7 @@ export function ResendVerificationPage() {
                     id="email"
                     type="email"
                     placeholder="you@example.com"
-                    disabled={loading}
+                    disabled={isLoading}
                     {...register('email')}
                     className="h-10"
                   />
@@ -99,8 +110,8 @@ export function ResendVerificationPage() {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Sending...' : 'Send Verification Email'}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Sending...' : 'Send Verification Email'}
                 </Button>
               </form>
 

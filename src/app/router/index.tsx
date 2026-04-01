@@ -1,64 +1,129 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuthStore } from '../../features/auth/store/authStore';
-import LoginPage from '../../pages/auth/LoginPage';
-import RegisterPage from '../../pages/auth/RegisterPage';
-import { VerifyEmailPage } from '../../pages/auth/VerifyEmailPage';
-import { ResendVerificationPage } from '../../pages/auth/ResendVerificationPage';
-import { VerifyEmailTokenPage } from '../../pages/auth/VerifyEmailTokenPage';
-import DashboardPage from '../../pages/dashboard/DashboardPage';
-import AdminDashboardPage from '../../pages/dashboard/AdminDashboardPage';
-import UserDashboardPage from '../../pages/dashboard/UserDashboardPage';
-import AdminUsersPage from '../../pages/users/AdminUsersPage';
-import { getRedirectPath } from '../../lib/redirectByRole';
+import { useAppSelector, useAppDispatch } from '@/redux/hooks';
+import { logout } from '@/redux/features/auth/authSlice';
+import type { RoleName } from '@/types/user';
+import { getRedirectPath, ROLE_LANDING } from '@/lib/redirectByRole';
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user } = useAuthStore();
-  
-  // Only redirect if explicitly not verified
-  if (user && user.isEmailVerified === false) {
-    return <Navigate to="/verify-email" replace />;
-  }
-  
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
-};
+// auth pages
+import LoginPage from '@/pages/auth/LoginPage';
+import RegisterPage from '@/pages/auth/RegisterPage';
+import { VerifyEmailPage } from '@/pages/auth/VerifyEmailPage';
+import { ResendVerificationPage } from '@/pages/auth/ResendVerificationPage';
+import { VerifyEmailTokenPage } from '@/pages/auth/VerifyEmailTokenPage';
 
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, user } = useAuthStore();
-  
-  // If user has session, redirect to role-specific dashboard
-  if (isAuthenticated && user) {
-    return <Navigate to={getRedirectPath(user.roles)} replace />;
+// dashboards
+import AdminDashboardPage from '@/pages/dashboard/AdminDashboardPage';
+import FormationDashboardPage from '@/pages/dashboard/FormationDashboardPage';
+import EncadreurDashboardPage from '@/pages/dashboard/EncadreurDashboardPage';
+import AcademiqueDashboardPage from '@/pages/dashboard/AcademiqueDashboardPage';
+import StudentDashboardPage from '@/pages/dashboard/StudentDashboardPage';
+
+// admin pages
+import AdminUsersPage from '@/pages/users/AdminUsersPage';
+import AdminRolesPage from '@/pages/roles/AdminRolesPage';
+import AdminPermissionsPage from '@/pages/permissions/AdminPermissionsPage';
+
+// misc
+import UnauthorizedPage from '@/pages/unauthorized/UnauthorizedPage';
+import NotFoundPage from '@/pages/NotFoundPage';
+
+// ---------------------------------------------------------------------------
+// ProtectedRoute — redirects to /login if not authenticated,
+//                  redirects to /unauthorized if role not in requiredRoles.
+//                  Pass no requiredRoles to allow any authenticated user.
+// ---------------------------------------------------------------------------
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  requiredRoles?: RoleName[];
+}
+
+const ProtectedRoute = ({ children, requiredRoles }: ProtectedRouteProps) => {
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const role = useAppSelector((state) => state.auth.role);
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  if (requiredRoles && requiredRoles.length > 0) {
+    if (!role || !requiredRoles.includes(role)) {
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
-  
+
   return <>{children}</>;
 };
 
+// ---------------------------------------------------------------------------
+// PublicRoute — redirects authenticated users to their dashboard
+// ---------------------------------------------------------------------------
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const role = useAppSelector((state) => state.auth.role);
 
+  if (isAuthenticated) {
+    if (!role || !(role in ROLE_LANDING)) {
+      dispatch(logout());
+      return <>{children}</>;
+    }
+    return <Navigate to={getRedirectPath(role)} replace />;
+  }
+  return <>{children}</>;
+};
 
-export const AppRoutes = () => {
-  const { isAuthenticated, user } = useAuthStore();
-  
-  // Determine redirect for root and catch-all
-  let rootRedirect = '/login';
-  if (isAuthenticated && user?.isEmailVerified === true) {
-    rootRedirect = getRedirectPath(user.roles);
-  } else if (user && user.isEmailVerified === false) {
-    rootRedirect = '/verify-email';
+// ---------------------------------------------------------------------------
+// RootRedirect — smart redirect from "/"
+// ---------------------------------------------------------------------------
+const RootRedirect = () => {
+  const dispatch = useAppDispatch();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const role = useAppSelector((state) => state.auth.role);
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+
+  // If role is stale/unknown (e.g. old session with renamed roles), clear and go to login
+  if (!role || !(role in ROLE_LANDING)) {
+    dispatch(logout());
+    return <Navigate to="/login" replace />;
   }
 
-  return (
-    <Routes>
-      <Route path="/" element={<Navigate to={rootRedirect} replace />} />
-      <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
-      <Route path="/verify-email" element={<VerifyEmailPage />} />
-      <Route path="/verify-email-token" element={<VerifyEmailTokenPage />} />
-      <Route path="/resend-verification" element={<ResendVerificationPage />} />
-      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-      <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} />
-      <Route path="/admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
-      <Route path="/user/dashboard" element={<ProtectedRoute><UserDashboardPage /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to={rootRedirect} replace />} />
-    </Routes>
-  );
+  return <Navigate to={getRedirectPath(role)} replace />;
 };
+
+// ---------------------------------------------------------------------------
+// Routes
+// ---------------------------------------------------------------------------
+export const AppRoutes = () => (
+  <Routes>
+    {/* root */}
+    <Route path="/" element={<RootRedirect />} />
+
+    {/* public */}
+    <Route path="/login"               element={<PublicRoute><LoginPage /></PublicRoute>} />
+    <Route path="/register"            element={<PublicRoute><RegisterPage /></PublicRoute>} />
+    <Route path="/verify-email"        element={<VerifyEmailPage />} />
+    <Route path="/verify-email-token"  element={<VerifyEmailTokenPage />} />
+    <Route path="/resend-verification" element={<ResendVerificationPage />} />
+
+    {/* super_admin */}
+    <Route path="/admin/dashboard"  element={<ProtectedRoute requiredRoles={['super_admin']}><AdminDashboardPage /></ProtectedRoute>} />
+    <Route path="/admin/users"      element={<ProtectedRoute requiredRoles={['super_admin']}><AdminUsersPage /></ProtectedRoute>} />
+    <Route path="/admin/roles"      element={<ProtectedRoute requiredRoles={['super_admin']}><AdminRolesPage /></ProtectedRoute>} />
+    <Route path="/admin/permissions" element={<ProtectedRoute requiredRoles={['super_admin']}><AdminPermissionsPage /></ProtectedRoute>} />
+
+    {/* admin_formation */}
+    <Route path="/formation/dashboard" element={<ProtectedRoute requiredRoles={['admin_formation']}><FormationDashboardPage /></ProtectedRoute>} />
+
+    {/* encadrant_pro */}
+    <Route path="/encadreur/dashboard" element={<ProtectedRoute requiredRoles={['encadrant_pro']}><EncadreurDashboardPage /></ProtectedRoute>} />
+
+    {/* encadrant_academique */}
+    <Route path="/academique/dashboard" element={<ProtectedRoute requiredRoles={['encadrant_academique']}><AcademiqueDashboardPage /></ProtectedRoute>} />
+
+    {/* student */}
+    <Route path="/student/dashboard" element={<ProtectedRoute requiredRoles={['student']}><StudentDashboardPage /></ProtectedRoute>} />
+
+    {/* misc */}
+    <Route path="/unauthorized" element={<UnauthorizedPage />} />
+    <Route path="*"             element={<NotFoundPage />} />
+  </Routes>
+);

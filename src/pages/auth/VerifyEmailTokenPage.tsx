@@ -3,38 +3,54 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, AlertCircle, Clock, Copy } from 'lucide-react';
-import { useEmailVerification } from '@/features/auth/hooks/useEmailVerification';
-import { useAuthStore } from '@/features/auth/store/authStore';
+import { useVerifyEmailTokenMutation } from '@/redux/features/auth/authApi';
+
+const parseError = (error: unknown): string => {
+  if (!error) return 'An error occurred';
+  if (typeof error === 'string') return error;
+  if (typeof error === 'object' && error !== null) {
+    if ('data' in error && typeof error.data === 'object' && error.data && 'message' in error.data) {
+      return String((error.data as { message?: string }).message ?? 'Verification failed');
+    }
+    if ('error' in error && typeof (error as { error?: string }).error === 'string') {
+      return (error as { error: string }).error;
+    }
+    if ('message' in error && typeof (error as { message?: string }).message === 'string') {
+      return (error as { message: string }).message;
+    }
+  }
+  return 'Verification failed';
+};
 
 export function VerifyEmailTokenPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { verify, loading, message, error } = useEmailVerification();
+  const [verifyEmailToken, { isLoading }] = useVerifyEmailTokenMutation();
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const token = searchParams.get('token');
 
   useEffect(() => {
-    if (token) {
-      verify(token);
+    if (!token) {
+      return;
     }
-  }, [token, verify]);
 
-  // Update auth store if verification succeeds and user is logged in
-  useEffect(() => {
-    if (message && !error) {
-      const { user } = useAuthStore.getState();
-      if (user) {
-        const updatedUser = { ...user, isEmailVerified: true };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        useAuthStore.setState({
-          user: updatedUser,
-          isEmailVerified: true,
-          isAuthenticated: true,
-        });
+    const runVerification = async () => {
+      setMessage(null);
+      setError(null);
+
+      try {
+        const response = await verifyEmailToken(token).unwrap();
+        setMessage(response.message);
+      } catch (err) {
+        setError(parseError(err));
       }
-    }
-  }, [message, error]);
+    };
+
+    void runVerification();
+  }, [token, verifyEmailToken]);
 
   const handleBackToLogin = () => {
     navigate('/login');
@@ -127,7 +143,7 @@ export function VerifyEmailTokenPage() {
           </Card>
         )}
 
-        {loading && (
+        {isLoading && (
           <Card className="border-0 shadow-lg">
             <CardHeader className="space-y-2 pb-4">
               <div className="flex justify-center mb-4">
@@ -153,7 +169,7 @@ export function VerifyEmailTokenPage() {
           </Card>
         )}
 
-        {!token && !loading && (
+        {!token && !isLoading && (
           <Card className="border-0 shadow-lg">
             <CardHeader className="space-y-2 pb-4">
               <div className="flex justify-center mb-4">
