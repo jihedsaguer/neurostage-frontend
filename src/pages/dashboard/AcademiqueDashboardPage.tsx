@@ -1,31 +1,43 @@
-import { useLogout } from '@/lib/hooks/useLogout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+
+const STATS = [
+  { label: 'Total Students', value: '—', sub: 'Under supervision' },
+  { label: 'Active Projects', value: '—', sub: 'In progress' },
+  { label: 'Pending Reviews', value: '—', sub: 'Awaiting review' },
+  { label: 'Completed', value: '—', sub: 'Validated projects' },
+];
 
 const AcademiqueDashboardPage = () => {
-  const { handleLogout } = useLogout();
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <div className="w-full max-w-4xl">
-        <Card className="border-slate-200 shadow-lg">
-          <CardHeader className="space-y-2">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <CardTitle className="text-2xl text-slate-900">Académique Dashboard</CardTitle>
-                <CardDescription className="text-slate-600">Academic supervision and reporting.</CardDescription>
-              </div>
-              <Button type="button" variant="outline" onClick={handleLogout}>Logout</Button>
+    <DashboardLayout
+      title="Académique Dashboard"
+      subtitle="Academic supervision and reporting"
+      brandName="Academic Portal"
+    >
+      <div className="p-6 space-y-6">
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {STATS.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-slate-200 bg-white p-4"
+            >
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{stat.label}</p>
+              <p className="mt-1 text-2xl font-semibold text-slate-900">{stat.value}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{stat.sub}</p>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-slate-700">
-              <p className="font-medium">Academic tools</p>
-              <p className="text-sm text-slate-500">Your academic supervision tools will appear here.</p>
-            </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
+
+        {/* Placeholder content area */}
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+          <p className="text-sm font-medium text-slate-700">Academic supervision area</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Add student lists, project reviews, and academic reports here.
+          </p>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

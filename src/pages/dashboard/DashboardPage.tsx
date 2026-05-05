@@ -1,39 +1,23 @@
-import { useLogout } from '@/lib/hooks/useLogout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 const DashboardPage = () => {
-  const { handleLogout } = useLogout();
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <div className="w-full max-w-4xl">
-        <Card className="border-slate-200 shadow-lg">
-          <CardHeader className="space-y-2">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <CardTitle className="text-2xl text-slate-900">Dashboard</CardTitle>
-                <CardDescription className="text-slate-600">
-                  Welcome to NeuroStage. Your dashboard is loading role-specific content.
-                </CardDescription>
-              </div>
-              <Button type="button" variant="outline" onClick={handleLogout} className="h-10 rounded-md border-slate-300 text-slate-700 hover:bg-slate-100">
-                Logout
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-slate-700">
-              This page serves as the generic dashboard fallback for users without a specific role route.
-            </p>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-slate-700 mt-4">
-              <p className="font-medium">Dashboard placeholder content</p>
-              <p className="text-sm text-slate-500">Use this area to add common widgets and announcements.</p>
-            </div>
-          </CardContent>
-        </Card>
+    <DashboardLayout
+      title="Welcome to NeuroStage"
+      subtitle="Loading your role-specific dashboard..."
+    >
+      <div className="p-6">
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+          <svg className="h-12 w-12 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-sm font-medium text-slate-700 mb-1">Dashboard Fallback</p>
+          <p className="text-xs text-slate-400 max-w-md mx-auto">
+            This page serves as a generic dashboard fallback. Role-specific dashboards are available at /admin, /formation, /encadreur, /academique, and /student.
+          </p>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

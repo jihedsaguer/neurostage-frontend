@@ -1,31 +1,67 @@
-import { useLogout } from '@/lib/hooks/useLogout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+
+const STATS = [
+  { label: 'My Students', value: '—', sub: 'Under supervision' },
+  { label: 'Active Projects', value: '—', sub: 'In progress' },
+  { label: 'Pending Reviews', value: '—', sub: 'Awaiting feedback' },
+  { label: 'Completed', value: '—', sub: 'Validated projects' },
+];
 
 const EncadreurDashboardPage = () => {
-  const { handleLogout } = useLogout();
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <div className="w-full max-w-4xl">
-        <Card className="border-slate-200 shadow-lg">
-          <CardHeader className="space-y-2">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <CardTitle className="text-2xl text-slate-900">Encadreur Dashboard</CardTitle>
-                <CardDescription className="text-slate-600">Manage your students and assignments.</CardDescription>
-              </div>
-              <Button type="button" variant="outline" onClick={handleLogout}>Logout</Button>
+    <DashboardLayout
+      title="Encadreur Dashboard"
+      subtitle="Manage your students and their projects"
+      brandName="Encadreur Portal"
+    >
+      <div className="p-6 space-y-6">
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {STATS.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-slate-200 bg-white p-4"
+            >
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{stat.label}</p>
+              <p className="mt-1 text-2xl font-semibold text-slate-900">{stat.value}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{stat.sub}</p>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-slate-700">
-              <p className="font-medium">Encadreur tools</p>
-              <p className="text-sm text-slate-500">Your supervision tools will appear here.</p>
-            </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
+
+        {/* Quick actions */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <h2 className="mb-4 text-sm font-semibold text-slate-900">Quick actions</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {[
+              { label: 'View Students', path: '/encadreur/students', color: 'bg-blue-50 text-blue-700 hover:bg-blue-100' },
+              { label: 'Browse Subjects', path: '/subjects', color: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' },
+              { label: 'Review Projects', path: '/encadreur/projects', color: 'bg-violet-50 text-violet-700 hover:bg-violet-100' },
+            ].map((action) => (
+              <button
+                key={action.path}
+                type="button"
+                onClick={() => navigate(action.path)}
+                className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${action.color}`}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Placeholder content area */}
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+          <p className="text-sm font-medium text-slate-700">Supervision area</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Add student list, project tracking, and evaluation tools here.
+          </p>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

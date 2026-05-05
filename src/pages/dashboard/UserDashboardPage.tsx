@@ -1,41 +1,43 @@
-import { useLogout } from '@/lib/hooks/useLogout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+
+const STATS = [
+  { label: 'Total Tasks', value: '—', sub: 'Assigned work' },
+  { label: 'In Progress', value: '—', sub: 'Active tasks' },
+  { label: 'Completed', value: '—', sub: 'Finished tasks' },
+  { label: 'Pending', value: '—', sub: 'Yet to start' },
+];
 
 const UserDashboardPage = () => {
-  const { handleLogout } = useLogout();
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <div className="w-full max-w-4xl">
-        <Card className="border-slate-200 shadow-lg">
-          <CardHeader className="space-y-2">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <CardTitle className="text-2xl text-slate-900">User Dashboard</CardTitle>
-                <CardDescription className="text-slate-600">
-                  View your learning progress, active assignments, and account activity.
-                </CardDescription>
-              </div>
-              <Button type="button" variant="outline" onClick={handleLogout} className="h-10 rounded-md border-slate-300 text-slate-700 hover:bg-slate-100">
-                Logout
-              </Button>
+    <DashboardLayout
+      title="My Dashboard"
+      subtitle="View your progress, assignments, and activity"
+      brandName="User Portal"
+    >
+      <div className="p-6 space-y-6">
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {STATS.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-slate-200 bg-white p-4"
+            >
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{stat.label}</p>
+              <p className="mt-1 text-2xl font-semibold text-slate-900">{stat.value}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{stat.sub}</p>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-slate-700">
-                Welcome back. This dashboard will help you track your current tasks and recent activity.
-              </p>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-slate-700">
-                <p className="font-medium">Dashboard content placeholder</p>
-                <p className="text-sm text-slate-500">Add widgets here for assignments, notifications, and progress tracking.</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
+
+        {/* Placeholder content area */}
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+          <p className="text-sm font-medium text-slate-700">Your activity area</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Add task list, recent activity, and notifications here.
+          </p>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
