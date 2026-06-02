@@ -173,7 +173,11 @@ const AdminUsersPage = () => {
                       {user.roles.map((r) => r.name).join(', ') || 'None'}
                     </td>
                     <td className="px-4 py-4 text-slate-600 hidden lg:table-cell">
-                      {user.roles.flatMap((r) => (r.permissions ?? []) as string[]).join(', ') || 'None'}
+                      {user.roles.flatMap((r) => r.permissions ?? []).map((p) => {
+                        if (typeof p === 'string') return p;
+                        const obj = p as Record<string, unknown>;
+                        return String(obj.action ?? obj.name ?? '');
+                      }).filter(Boolean).join(', ') || 'None'}
                     </td>
                     <td className="px-4 py-4 space-x-2">
                       <Button type="button" variant="outline" size="sm" onClick={() => openEdit(user)}>Edit</Button>

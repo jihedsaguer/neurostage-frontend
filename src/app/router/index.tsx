@@ -11,21 +11,26 @@ import { VerifyEmailPage } from '@/pages/auth/VerifyEmailPage';
 import { ResendVerificationPage } from '@/pages/auth/ResendVerificationPage';
 import { VerifyEmailTokenPage } from '@/pages/auth/VerifyEmailTokenPage';
 
-// dashboards
 import AdminDashboardPage from '@/pages/dashboard/AdminDashboardPage';
 import FormationDashboardPage from '@/pages/dashboard/FormationDashboardPage';
 import EncadreurDashboardPage from '@/pages/dashboard/EncadreurDashboardPage';
 import AcademiqueDashboardPage from '@/pages/dashboard/AcademiqueDashboardPage';
 import StudentDashboardPage from '@/pages/dashboard/StudentDashboardPage';
 
-// admin pages
 import AdminUsersPage from '@/pages/users/AdminUsersPage';
 import AdminRolesPage from '@/pages/roles/AdminRolesPage';
 import AdminPermissionsPage from '@/pages/permissions/AdminPermissionsPage';
 
-// misc
+import SubjectsList from '@/pages/subjects/SubjectsList';
+import SubjectDetail from '@/pages/subjects/SubjectDetail';
+import SubjectForm from '@/pages/subjects/SubjectForm';
+import MySubjects from '@/pages/subjects/MySubjects';
+import SubjectCandidaturesPage from '@/pages/candidatures/SubjectCandidaturesPage';
+import AdminCandidaturesPage from '@/pages/candidatures/AdminCandidaturesPage';
+
 import UnauthorizedPage from '@/pages/unauthorized/UnauthorizedPage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import MyCandidaturesPage from '@/pages/candidatures/MyCandidaturesPage';
 
 // ---------------------------------------------------------------------------
 // ProtectedRoute — redirects to /login if not authenticated,
@@ -112,15 +117,26 @@ export const AppRoutes = () => (
 
     {/* admin_formation */}
     <Route path="/formation/dashboard" element={<ProtectedRoute requiredRoles={['admin_formation']}><FormationDashboardPage /></ProtectedRoute>} />
+    <Route path="/admin/candidatures" element={<ProtectedRoute requiredRoles={['super_admin', 'admin_formation']}><AdminCandidaturesPage /></ProtectedRoute>} />
 
     {/* encadrant_pro */}
     <Route path="/encadreur/dashboard" element={<ProtectedRoute requiredRoles={['encadrant_pro']}><EncadreurDashboardPage /></ProtectedRoute>} />
+    <Route path="/subjects/:id/candidatures" element={<ProtectedRoute requiredRoles={['super_admin', 'admin_formation', 'encadrant_pro']}><SubjectCandidaturesPage /></ProtectedRoute>} />
 
     {/* encadrant_academique */}
     <Route path="/academique/dashboard" element={<ProtectedRoute requiredRoles={['encadrant_academique']}><AcademiqueDashboardPage /></ProtectedRoute>} />
 
     {/* student */}
     <Route path="/student/dashboard" element={<ProtectedRoute requiredRoles={['student']}><StudentDashboardPage /></ProtectedRoute>} />
+
+    {/* subjects - accessible to all authenticated users */}
+    <Route path="/subjects" element={<ProtectedRoute><SubjectsList /></ProtectedRoute>} />
+    <Route path="/subjects/my" element={<ProtectedRoute><MySubjects /></ProtectedRoute>} />
+    <Route path="/subjects/new" element={<ProtectedRoute><SubjectForm /></ProtectedRoute>} />
+    <Route path="/subjects/:id" element={<ProtectedRoute><SubjectDetail /></ProtectedRoute>} />
+    <Route path="/subjects/:id/edit" element={<ProtectedRoute><SubjectForm /></ProtectedRoute>} />
+    {/* candidatures - accessible to all authenticated users */}
+    <Route path="/candidatures/my" element={<ProtectedRoute><MyCandidaturesPage /></ProtectedRoute>} />
 
     {/* misc */}
     <Route path="/unauthorized" element={<UnauthorizedPage />} />

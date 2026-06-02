@@ -70,7 +70,9 @@ export const baseApi = createApi({
   tagTypes: [
     'Auth', 
     'User',
-     'Role', 
-     'Permission'
-    ],
+    'Role', 
+    'Permission',
+    'Subject',
+    'Canditature',
+  ],
 });

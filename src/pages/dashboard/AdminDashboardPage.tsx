@@ -1,54 +1,64 @@
 import { useNavigate } from 'react-router-dom';
-import { useLogout } from '@/lib/hooks/useLogout';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+
+const STATS = [
+  { label: 'Total Users', value: '—', sub: 'Registered accounts' },
+  { label: 'Active Roles', value: '—', sub: 'Configured roles' },
+  { label: 'Permissions', value: '—', sub: 'Access rules' },
+  { label: 'Subjects', value: '—', sub: 'Content units' },
+];
 
 const AdminDashboardPage = () => {
-  const { handleLogout } = useLogout();
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <div className="w-full max-w-4xl">
-        <Card className="border-slate-200 shadow-lg">
-          <CardHeader className="space-y-2">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <CardTitle className="text-2xl text-slate-900">Admin Dashboard</CardTitle>
-                <CardDescription className="text-slate-600">
-                  Access admin controls, review system activity, and manage platform settings.
-                </CardDescription>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button type="button" variant="outline" onClick={() => navigate('/admin/users')} className="h-10 rounded-md border-slate-300 text-slate-700 hover:bg-slate-100">
-                  Manage Users
-                </Button>
-                <Button type="button" variant="outline" onClick={() => navigate('/admin/roles')} className="h-10 rounded-md border-slate-300 text-slate-700 hover:bg-slate-100">
-                  Roles
-                </Button>
-                <Button type="button" variant="outline" onClick={() => navigate('/admin/permissions')} className="h-10 rounded-md border-slate-300 text-slate-700 hover:bg-slate-100">
-                  Permissions
-                </Button>
-                <Button type="button" variant="outline" onClick={handleLogout} className="h-10 rounded-md border-slate-300 text-slate-700 hover:bg-slate-100">
-                  Logout
-                </Button>
-              </div>
+    <DashboardLayout title="Dashboard" subtitle="Overview of your platform" brandName="Admin Portal">
+      <div className="p-6 space-y-6">
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {STATS.map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-slate-200 bg-white p-4"
+            >
+              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{stat.label}</p>
+              <p className="mt-1 text-2xl font-semibold text-slate-900">{stat.value}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{stat.sub}</p>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <p className="text-slate-700">
-                Welcome to the admin portal. Use the sidebar to navigate user management, role assignments, and permissions.
-              </p>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-slate-700">
-                <p className="font-medium">Dashboard content placeholder</p>
-                <p className="text-sm text-slate-500">Replace this area with widgets, charts, or admin controls as needed.</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
+
+        {/* Quick actions */}
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <h2 className="mb-4 text-sm font-semibold text-slate-900">Quick actions</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { label: 'Manage Users', path: '/admin/users', color: 'bg-blue-50 text-blue-700 hover:bg-blue-100' },
+              { label: 'Edit Roles', path: '/admin/roles', color: 'bg-violet-50 text-violet-700 hover:bg-violet-100' },
+              { label: 'Permissions', path: '/admin/permissions', color: 'bg-amber-50 text-amber-700 hover:bg-amber-100' },
+              { label: 'Subjects', path: '/subjects', color: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' },
+            ].map((action) => (
+              <button
+                key={action.path}
+                type="button"
+                onClick={() => navigate(action.path)}
+                className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${action.color}`}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Placeholder content area */}
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+          <p className="text-sm font-medium text-slate-700">Content area</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Replace with widgets, charts, or tables as needed.
+          </p>
+        </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
