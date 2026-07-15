@@ -4,8 +4,10 @@ import { useFetchSubjectByIdQuery } from '@/redux/features/subjects/subjectsApi'
 import { useListSubjectCandidaturesQuery, useUpdateCandidatureStatusMutation } from '@/redux/features/canditatures/canditaturesApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import PageHeader from '@/components/ui/PageHeader';
 import CandidatureList from '@/components/candidatures/CandidatureList';
 import CandidatureStatusActions from '@/components/candidatures/CandidatureStatusActions';
+import type { CanditatureStatus } from '@/types/canditatures';
 
 const SubjectCandidaturesPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +30,7 @@ const SubjectCandidaturesPage = () => {
     };
   }, [candidatures]);
 
-  const handleStatusChange = async (candidatureId: string, status: 'accepted' | 'shortlisted' | 'rejected') => {
+  const handleStatusChange = async (candidatureId: string, status: CanditatureStatus) => {
     try {
       await updateCandidatureStatus({ id: candidatureId, status }).unwrap();
       void refetch();
@@ -63,20 +65,16 @@ const SubjectCandidaturesPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Candidatures for {subject.title}</h1>
-            <p className="text-sm text-slate-500">Review applications submitted for this subject.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate(`/subjects/${subject.id}`)}>
-              Back to Subject
-            </Button>
+        <PageHeader
+          title={`Candidatures for ${subject.title}`}
+          subtitle="Review applications submitted for this subject and update status quickly."
+          backTo={`/subjects/${subject.id}`}
+          actions={
             <Button size="sm" onClick={() => refetch()} disabled={isCandidaturesLoading}>
               Refresh
             </Button>
-          </div>
-        </div>
+          }
+        />
 
         <div className="grid gap-4 md:grid-cols-4">
           <Card className="border-slate-200 bg-slate-50">

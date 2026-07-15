@@ -20,17 +20,28 @@ import StudentDashboardPage from '@/pages/dashboard/StudentDashboardPage';
 import AdminUsersPage from '@/pages/users/AdminUsersPage';
 import AdminRolesPage from '@/pages/roles/AdminRolesPage';
 import AdminPermissionsPage from '@/pages/permissions/AdminPermissionsPage';
+import AuditLogsPage from '@/pages/audit/AuditLogsPage';
+import AdminStagesPage from '@/pages/stages/AdminStagesPage';
+import AdminStageDetailPage from '@/pages/stages/AdminStageDetailPage';
+import StudentStagePage from '@/pages/stages/StudentStagePage';
+import ProStagesPage from '@/pages/stages/ProStagesPage';
+import AcadStagesPage from '@/pages/stages/AcadStagesPage';
 
 import SubjectsList from '@/pages/subjects/SubjectsList';
 import SubjectDetail from '@/pages/subjects/SubjectDetail';
 import SubjectForm from '@/pages/subjects/SubjectForm';
 import MySubjects from '@/pages/subjects/MySubjects';
+import ProfilePage from '@/pages/profile/ProfilePage';
 import SubjectCandidaturesPage from '@/pages/candidatures/SubjectCandidaturesPage';
 import AdminCandidaturesPage from '@/pages/candidatures/AdminCandidaturesPage';
 
 import UnauthorizedPage from '@/pages/unauthorized/UnauthorizedPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import MyCandidaturesPage from '@/pages/candidatures/MyCandidaturesPage';
+import JalonsListPage from '@/pages/jalons/JalonsListPage';
+import JalonDetailPage from '@/pages/jalons/JalonDetailPage';
+import ChatPage from '@/pages/chat/ChatPage';
+import RagDocumentsPage from '@/pages/admin/RagDocumentsPage';
 
 // ---------------------------------------------------------------------------
 // ProtectedRoute — redirects to /login if not authenticated,
@@ -114,9 +125,18 @@ export const AppRoutes = () => (
     <Route path="/admin/users"      element={<ProtectedRoute requiredRoles={['super_admin']}><AdminUsersPage /></ProtectedRoute>} />
     <Route path="/admin/roles"      element={<ProtectedRoute requiredRoles={['super_admin']}><AdminRolesPage /></ProtectedRoute>} />
     <Route path="/admin/permissions" element={<ProtectedRoute requiredRoles={['super_admin']}><AdminPermissionsPage /></ProtectedRoute>} />
+    <Route path="/admin/audit" element={<ProtectedRoute requiredRoles={['super_admin', 'admin_formation']}><AuditLogsPage /></ProtectedRoute>} />
+
+    {/* stages — IMPORTANT: static /my/stage before /:id */}
+    <Route path="/admin/stages"     element={<ProtectedRoute requiredRoles={['super_admin', 'admin_formation']}><AdminStagesPage /></ProtectedRoute>} />
+    <Route path="/admin/stages/:id" element={<ProtectedRoute requiredRoles={['super_admin', 'admin_formation']}><AdminStageDetailPage /></ProtectedRoute>} />
+    <Route path="/student/stage"    element={<ProtectedRoute requiredRoles={['student']}><StudentStagePage /></ProtectedRoute>} />
+    <Route path="/pro/stages"       element={<ProtectedRoute requiredRoles={['encadrant_pro']}><ProStagesPage /></ProtectedRoute>} />
+    <Route path="/acad/stages"      element={<ProtectedRoute requiredRoles={['encadrant_academique']}><AcadStagesPage /></ProtectedRoute>} />
 
     {/* admin_formation */}
     <Route path="/formation/dashboard" element={<ProtectedRoute requiredRoles={['admin_formation']}><FormationDashboardPage /></ProtectedRoute>} />
+    <Route path="/formation/knowledge-base" element={<ProtectedRoute requiredRoles={['admin_formation', 'super_admin']}><RagDocumentsPage /></ProtectedRoute>} />
     <Route path="/admin/candidatures" element={<ProtectedRoute requiredRoles={['super_admin', 'admin_formation']}><AdminCandidaturesPage /></ProtectedRoute>} />
 
     {/* encadrant_pro */}
@@ -129,6 +149,9 @@ export const AppRoutes = () => (
     {/* student */}
     <Route path="/student/dashboard" element={<ProtectedRoute requiredRoles={['student']}><StudentDashboardPage /></ProtectedRoute>} />
 
+    {/* profile — all authenticated users */}
+    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
     {/* subjects - accessible to all authenticated users */}
     <Route path="/subjects" element={<ProtectedRoute><SubjectsList /></ProtectedRoute>} />
     <Route path="/subjects/my" element={<ProtectedRoute><MySubjects /></ProtectedRoute>} />
@@ -137,6 +160,13 @@ export const AppRoutes = () => (
     <Route path="/subjects/:id/edit" element={<ProtectedRoute><SubjectForm /></ProtectedRoute>} />
     {/* candidatures - accessible to all authenticated users */}
     <Route path="/candidatures/my" element={<ProtectedRoute><MyCandidaturesPage /></ProtectedRoute>} />
+
+    {/* jalons — all authenticated roles (scoped server-side) */}
+    <Route path="/stages/:stageId/jalons" element={<ProtectedRoute><JalonsListPage /></ProtectedRoute>} />
+    <Route path="/jalons/:id" element={<ProtectedRoute><JalonDetailPage /></ProtectedRoute>} />
+
+    {/* chat — all authenticated users */}
+    <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
 
     {/* misc */}
     <Route path="/unauthorized" element={<UnauthorizedPage />} />

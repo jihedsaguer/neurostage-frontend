@@ -4,9 +4,13 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL,
   credentials: 'include',
-  prepareHeaders: (headers, { getState }) => {
+  prepareHeaders: (headers, { getState, arg }) => {
     const token = (getState() as { auth?: { accessToken?: string | null } }).auth?.accessToken;
-    headers.set('Content-Type', 'application/json');
+    const body =
+      typeof arg === 'object' && arg !== null && 'body' in arg ? arg.body : undefined;
+    if (body && !(body instanceof FormData)) {
+      headers.set('Content-Type', 'application/json');
+    }
 
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
@@ -74,5 +78,11 @@ export const baseApi = createApi({
     'Permission',
     'Subject',
     'Canditature',
+    'Audit',
+    'Profile',
+    'Stage',
+    'Jalon',
+    'Chat',
+    'Rag',
   ],
 });

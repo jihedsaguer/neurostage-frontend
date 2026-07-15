@@ -56,8 +56,8 @@ const AdminRolesPage = () => {
                   <tr key={role.id}>
                     <td className="px-4 py-4 font-medium text-slate-900">{role.name}</td>
                     <td className="px-4 py-4 text-slate-600">
-                      {role.permissions.length > 0
-                        ? role.permissions.map((p) => p.name).join(', ')
+                      {role.permissions && role.permissions.length > 0
+                        ? role.permissions.join(', ')
                         : <span className="text-slate-400 italic">No permissions</span>}
                     </td>
                   </tr>

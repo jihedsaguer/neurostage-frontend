@@ -31,13 +31,20 @@ export const canditaturesApi = baseApi.injectEndpoints({
             ]
           : [{ type: 'Canditature', id: `SUBJECT-${subjectId}` }],
     }),
+    // Admin — all candidatures (for stage creation dropdown)
+    listAllCandidatures: builder.query<CanditatureResponse[], void>({
+      query: () => '/candidatures',
+      providesTags: [{ type: 'Canditature', id: 'LIST' }],
+    }),
     updateCandidatureStatus: builder.mutation<CanditatureResponse, { id: string; status: CanditatureStatus }>({
       query: ({ id, status }) => ({
         url: `/candidatures/${id}/status`,
         method: 'PATCH',
         body: { status },
       }),
-      invalidatesTags: ['Canditature'],
+      // When a candidature is ACCEPTED the backend auto-creates a stage —
+      // invalidate Stage cache so any open stages list refreshes automatically.
+      invalidatesTags: ['Canditature', 'Stage'],
     }),
   }),
 });
@@ -46,6 +53,7 @@ export const {
   useApplyToSubjectMutation,
   useListMyCandidaturesQuery,
   useListSubjectCandidaturesQuery,
+  useListAllCandidaturesQuery,
   useUpdateCandidatureStatusMutation,
   useLazyListSubjectCandidaturesQuery,
 } = canditaturesApi;

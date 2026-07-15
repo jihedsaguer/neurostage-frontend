@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useCreateSubjectMutation, useUpdateSubjectMutation, useFetchSubjectByIdQuery } from '@/redux/features/subjects/subjectsApi';
 import { useAppSelector } from '@/redux/hooks';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeader from '@/components/ui/PageHeader';
 import { ArrowLeft } from 'lucide-react';
 import { SUBJECT_LEVELS } from '@/types/subject.types';
 import type { CreateSubjectDto } from '@/types/subject.types';
@@ -13,6 +14,7 @@ import type { CreateSubjectDto } from '@/types/subject.types';
 const SubjectForm = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const role = useAppSelector((state) => state.auth.role);
   const isEdit = !!id;
 
@@ -41,6 +43,19 @@ const SubjectForm = () => {
       });
     }
   }, [existingSubject]);
+
+  useEffect(() => {
+    const prefill = (location.state as { prefill?: CreateSubjectDto })?.prefill;
+    if (prefill && isEdit) {
+      setFormData({
+        title: prefill.title ?? '',
+        description: prefill.description ?? '',
+        technologies: prefill.technologies ?? [],
+        level: prefill.level ?? '',
+        prerequisites: prefill.prerequisites ?? '',
+      });
+    }
+  }, [location.state, isEdit]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,11 +92,22 @@ const SubjectForm = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">
-      <div className="max-w-3xl mx-auto">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+      <div className="max-w-3xl mx-auto space-y-6">
+        <PageHeader
+          title={isEdit ? 'Edit Subject' : role === 'student' ? 'Propose Subject' : 'Create Subject'}
+          subtitle={
+            role === 'student'
+              ? 'Propose a new internship subject for validation.'
+              : 'Create or update a subject with clear details and requirements.'
+          }
+          backTo={-1}
+          actions={
+            <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Cancel
+            </Button>
+          }
+        />
 
         <Card>
           <CardHeader>
