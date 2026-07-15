@@ -66,6 +66,21 @@ export interface ValidateSubjectDto {
   status: 'VALIDATED' | 'REJECTED';
 }
 
+export interface GenerateDraftRequest {
+  studentIds: string[];
+  context?: string;
+}
+
+export interface GenerateDraftResponse {
+  titre: string;
+  description: string;
+  techno: string[];
+  prerequis: string;
+  niveau: string;
+  subjectId: string;
+  status: string;
+}
+
 export const SUBJECT_LEVELS = [
   'Licence',
   'Master',

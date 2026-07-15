@@ -6,7 +6,8 @@ import type {
   ValidateSubjectDto,
   SubjectsApiResponse,
   SubjectsQueryParams,
-  
+  GenerateDraftRequest,
+  GenerateDraftResponse,
 } from '@/types/subject.types';
 
 export const subjectsApi = baseApi.injectEndpoints({
@@ -82,6 +83,31 @@ export const subjectsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Subject'],
     }),
+
+    // Submit DRAFT subject for review — uses the validate endpoint with PENDING status
+    // There is no /submit endpoint; the correct flow is PATCH /validate with { status: 'PENDING' }
+    submitSubjectForReview: builder.mutation<Subject, string>({
+      query: (id) => ({
+        url: `/subjects/${id}/validate`,
+        method: 'PATCH',
+        body: { status: 'PENDING' },
+      }),
+      invalidatesTags: ['Subject'],
+    }),
+
+    getSubjectById: builder.query<Subject, string>({
+      query: (id) => `/subjects/${id}`,
+      providesTags: (_result, _error, id) => [{ type: 'Subject', id }],
+    }),
+
+    generateDraft: builder.mutation<GenerateDraftResponse, GenerateDraftRequest>({
+      query: (body) => ({
+        url: '/subjects/generate-draft',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Subject'],
+    }),
   }),
   overrideExisting: false,
 });
@@ -120,5 +146,7 @@ export const {
   useUpdateSubjectMutation,
   useDeleteSubjectMutation,
   useValidateSubjectMutation,
-  
+  useSubmitSubjectForReviewMutation,
+  useGetSubjectByIdQuery,
+  useGenerateDraftMutation,
 } = subjectsApi;

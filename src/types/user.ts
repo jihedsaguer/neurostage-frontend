@@ -25,6 +25,10 @@ export interface UserDto {
   isActive?: boolean;
   isEmailVerified?: boolean;
   roles: RoleDto[];
-  // flattened permissions from JWT / login response
   permissions?: string[];
+  profile?: {
+    isAiProcessed?: boolean;
+    university?: string | null;
+    level?: string | null;
+  };
 }

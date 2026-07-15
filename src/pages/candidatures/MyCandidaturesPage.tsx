@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Lightbulb } from 'lucide-react';
+import PageHeader from '@/components/ui/PageHeader';
+import { Lightbulb } from 'lucide-react';
 import { useListMyCandidaturesQuery } from '@/redux/features/canditatures/canditaturesApi';
 import CandidatureList from '@/components/candidatures/CandidatureList';
 
@@ -11,22 +12,17 @@ const MyCandidaturesPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
-              <ArrowLeft className="h-4 w-4" />
+      <div className="max-w-5xl mx-auto space-y-6">
+        <PageHeader
+          title="My Candidatures"
+          subtitle="Review the status of every application you submitted."
+          backTo={-1}
+          actions={
+            <Button onClick={() => navigate('/subjects')}>
+              Browse Validated Subjects
             </Button>
-            <div>
-              <h1 className="text-2xl font-semibold text-slate-900">My Candidatures</h1>
-              <p className="text-slate-500 text-sm">Review the status of every application you submitted.</p>
-            </div>
-          </div>
-
-          <Button onClick={() => navigate('/subjects')}>
-            Browse Validated Subjects
-          </Button>
-        </div>
+          }
+        />
 
         {isError && (
           <Card className="border-red-200 bg-red-50 mb-6">

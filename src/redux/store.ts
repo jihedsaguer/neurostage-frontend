@@ -4,6 +4,8 @@ import storage from 'redux-persist/lib/storage';
 import { baseApi } from './api/baseApi';
 import authReducer from './features/auth/authSlice';
 import usersReducer from './features/users/usersSlice';
+import chatReducer from './features/chat/chatSlice';
+import './features/rag/ragApi';
 
 const persistConfig = {
   key: 'auth',
@@ -18,6 +20,7 @@ export const store = configureStore({
     [baseApi.reducerPath]: baseApi.reducer,
     auth: persistedAuthReducer,
     users: usersReducer,
+    chat: chatReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

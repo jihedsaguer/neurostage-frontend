@@ -18,10 +18,26 @@ export interface UpdateUserDto {
   isActive?: boolean;
 }
 
+/** Returned by GET /users/students/with-embeddings */
+export interface StudentWithEmbedding {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  university: string | null;
+  level: string | null;
+  skills: string[];
+  isAiProcessed: true;
+}
+
 export const usersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     fetchUsers: builder.query<UserDto[], void>({
       query: () => ({ url: '/users' }),
+      providesTags: ['User'],
+    }),
+    getStudents: builder.query<StudentWithEmbedding[], void>({
+      query: () => ({ url: '/users/students/with-embeddings' }),
       providesTags: ['User'],
     }),
     fetchUserById: builder.query<UserDto, string>({
@@ -65,6 +81,7 @@ export const usersApi = baseApi.injectEndpoints({
 
 export const {
   useFetchUsersQuery,
+  useGetStudentsQuery,
   useFetchUserByIdQuery,
   useCreateUserMutation,
   useUpdateUserMutation,

@@ -40,4 +40,31 @@ export const NavIcons = {
       <path d="M12 12c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   ),
+
+  audit: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect x="2" y="1" width="12" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5 5h6M5 8h6M5 11h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+
+  profile: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M2 14c0-2.21 2.686-4 6-4s6 1.79 6 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  ),
+
+  stages: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M2 8h12M8 2v12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  ),
+
+  chat: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M14 9.333A1.333 1.333 0 0 1 12.667 10.667H4.667L2 13.333V3.333A1.333 1.333 0 0 1 3.333 2H12.667A1.333 1.333 0 0 1 14 3.333Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
 };
